@@ -1,0 +1,22 @@
+# Виртуальные окружения
+/venv
+
+# Кэш Python
+__pycache__/
+*.pyc
+
+# Папка с загрузками, которая лежит ВНУТРИ папки app
+/app/uploads/
+
+# Файлы редакторов
+.vscode/
+.history/
+.idea/
+
+# Файлы ОС
+.DS_Store
+Thumbs.db
+
+# Логи и секреты
+*.log
+.env

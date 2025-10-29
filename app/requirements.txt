@@ -1,3 +1,5 @@
+Flask
+flasgger
 openai-whisper>=20231117
 librosa>=0.10.0
 numpy>=1.21.0
