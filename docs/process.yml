@@ -1,0 +1,38 @@
+# docs/process.yml (ВЕРСИЯ ДЛЯ OpenAPI 3.0)
+
+summary: Загрузка аудиофайла для обработки
+description: Клиент отправляет аудиофайл, сервер принимает его, сохраняет и возвращает ID задачи для дальнейшего отслеживания.
+tags:
+  - Speech Processing
+
+# В OpenAPI 3.0 для описания тела запроса используется объект requestBody
+requestBody:
+  required: true
+  content:
+    # Мы указываем, что ожидаем multipart/form-data
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          # Вот здесь мы описываем наш файл
+          audio_file:
+            type: string
+            format: binary # Это ключевой момент, который говорит Swagger UI нарисовать кнопку выбора файла
+            description: Аудиофайл для распознавания и суммаризации (wav, mp3, ogg, m4a).
+
+responses:
+  '202': # Коды ответов в OpenAPI 3.0 принято заключать в кавычки
+    description: Файл успешно принят в обработку.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: File accepted for processing
+            task_id:
+              type: string
+              example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+  '400':
+    description: Некорректный запрос (файл не приложен или неверный тип).

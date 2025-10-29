@@ -1,0 +1,23 @@
+summary: Проверка статуса задачи
+description: Узнать текущий статус обработки по ID задачи.
+tags:
+  - Speech Processing
+parameters:
+  - name: task_id
+    in: path
+    type: string
+    required: true
+    description: ID задачи, полученный после загрузки файла.
+responses:
+  200:
+    description: Статус задачи.
+    schema:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+          example: "processing"
+  404:
+    description: Задача с таким ID не найдена.

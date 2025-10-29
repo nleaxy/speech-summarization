@@ -1,0 +1,29 @@
+summary: Получение результата обработки
+description: Получить расшифрованный текст и его краткое содержание.
+tags:
+  - Speech Processing
+parameters:
+  - name: task_id
+    in: path
+    type: string
+    required: true
+    description: ID задачи, полученный после загрузки файла.
+responses:
+  200:
+    description: Результат обработки.
+    schema:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+          example: "completed"
+        transcription:
+          type: string
+        summary:
+          type: string
+  202:
+    description: Задача еще в процессе обработки.
+  404:
+    description: Задача с таким ID не найдена.
