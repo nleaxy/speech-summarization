@@ -30,7 +30,7 @@ def _add_speaker_diarization(transcription):
 # ======================================================================
 # ЭТО НАША ГЛАВНАЯ ФУНКЦИЯ, КОТОРУЮ БУДЕТ ДЕРГАТЬ БЭКЕНД
 # ======================================================================
-def run_transcription(audio_filepath: str, summary_type: str = 'brief'):
+def run_transcription(audio_filepath: str, summary_type: str):
     """
     Принимает путь к аудиофайлу и возвращает результат транскрибации в виде словаря.
     """

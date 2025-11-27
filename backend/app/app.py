@@ -60,7 +60,14 @@ def process_audio():
     file = request.files['audio_file']
     
     # ИСПРАВЛЕНО: Читаем поле 'compression_level', которое присылает твой фронтенд
-    summary_type = request.form.get('compression_level', 'brief')
+    #summary_type = request.form.get('compression_level', 'brief')
+    summary_type = (
+        request.form.get('type') or           # Стандартное название
+        request.form.get('summary_type') or   # Альтернативное название
+        request.form.get('compression_level') or  # Старое название
+        request.form.get('summarization_type') or # Ещё один вариант
+        'brief'  # По умолчанию
+    )
 
     if file.filename == '' or not allowed_file(file.filename):
         return jsonify({"error": "Invalid file or file type"}), 400

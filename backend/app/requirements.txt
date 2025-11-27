@@ -1,9 +1,9 @@
 Flask
 flasgger
-openai-whisper>=20231117
-librosa>=0.10.0
-numpy>=1.21.0
-torch>=2.0.0
-soundfile>=0.12.1
+openai-whisper
+librosa
+numpy
+torch
+soundfile
 requests
 python-dotenv
