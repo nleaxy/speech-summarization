@@ -69,4 +69,4 @@ cd speech_summary
     python backend/run.py
     ```
 
-3.  **Откройте приложение в браузере** по адресу: `http://localhost:5000`https://github.com/nleaxy/speech-summarization.git
+3.  **Откройте приложение в браузере** по адресу: `http://localhost:5000`
