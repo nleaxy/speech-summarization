@@ -4,6 +4,7 @@ import whisper
 import librosa
 import numpy as np
 from pathlib import Path
+from .summarizer import summarize_text
 
 # ======================================================================
 # ВАЖНО: Загружаем модель ОДИН РАЗ, когда этот модуль импортируется.
@@ -29,7 +30,7 @@ def _add_speaker_diarization(transcription):
 # ======================================================================
 # ЭТО НАША ГЛАВНАЯ ФУНКЦИЯ, КОТОРУЮ БУДЕТ ДЕРГАТЬ БЭКЕНД
 # ======================================================================
-def run_transcription(audio_filepath: str):
+def run_transcription(audio_filepath: str, summary_type: str = 'brief'):
     """
     Принимает путь к аудиофайлу и возвращает результат транскрибации в виде словаря.
     """
@@ -60,6 +61,22 @@ def run_transcription(audio_filepath: str):
                 for segment in result_with_speakers.get("segments", [])
             ]
         }
+
+        # --- ЭТАП 2: СУММАРИЗАЦИЯ ---
+        # Теперь, когда у нас есть текст, мы передаем его в суммаризатор.
+        
+        # Проверяем, что текст не пустой
+        if final_result and final_result.get("text"):
+            print(f"INFO: Текст получен, отправляю на суммаризацию (тип: {summary_type})...")
+            
+            # Вызываем функцию summarize_text из соседнего файла
+            summary_data = summarize_text(final_result["text"], summary_type)
+            
+            # Добавляем результат суммаризации в наш итоговый JSON
+            final_result["summary_data"] = summary_data
+        else:
+            # Если текста нет, добавляем сообщение об ошибке
+            final_result["summary_data"] = {"error": "Текст для суммаризации не был получен."}
         
         print(f"INFO: Обработка файла {audio_filepath} завершена успешно.")
         return final_result
