@@ -2,7 +2,7 @@
 # ЭТАП 1: Сборка Фронтенда (назовем этот этап 'frontend-builder')
 # =================================================================
 # Берем образ Node.js, чтобы получить npm и все инструменты
-FROM node:18-alpine as frontend-builder
+FROM node:20-alpine as frontend-builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /frontend
@@ -11,8 +11,9 @@ WORKDIR /frontend
 # Мы копируем сначала только их, чтобы Docker кэшировал установку
 COPY speech-ui/package*.json ./
 
-# Устанавливаем зависимости фронтенда
-RUN npm install
+# Принудительно чистим кэш npm и node_modules на всякий случай
+RUN npm cache clean --force
+RUN npm ci
 
 # Копируем весь остальной код фронтенда
 COPY speech-ui .

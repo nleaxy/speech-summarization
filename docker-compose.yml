@@ -11,4 +11,10 @@ services:
       - "5000:5000"
     env_file:
       - ./backend/.env
+    volumes:
+      - whisper_cache:/root/.cache/whisper
     container_name: speech_summarizer_service
+
+
+volumes:
+  whisper_cache:

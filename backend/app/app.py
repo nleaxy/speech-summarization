@@ -5,8 +5,8 @@ from flask_cors import CORS  # <-- Убедись, что CORS импортир�
 from werkzeug.utils import secure_filename
 
 # Импортируем наши "движки"
-from .whisper_transcriber import run_transcription
-from .summarizer import get_available_types
+from whisper_transcriber import run_transcription
+from summarizer import get_available_types
 
 # --- Настройка путей для работы с React-сборкой ---
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))

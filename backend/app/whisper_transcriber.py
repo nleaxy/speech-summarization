@@ -4,7 +4,7 @@ import whisper
 import librosa
 import numpy as np
 from pathlib import Path
-from .summarizer import summarize_text
+from summarizer import summarize_text
 
 # ======================================================================
 # ВАЖНО: Загружаем модель ОДИН РАЗ, когда этот модуль импортируется.
