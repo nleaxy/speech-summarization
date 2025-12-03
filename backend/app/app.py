@@ -60,7 +60,6 @@ def process_audio():
     file = request.files['audio_file']
     
     # ИСПРАВЛЕНО: Читаем поле 'compression_level', которое присылает твой фронтенд
-    #summary_type = request.form.get('compression_level', 'brief')
     summary_type = (
         request.form.get('type') or           # Стандартное название
         request.form.get('summary_type') or   # Альтернативное название

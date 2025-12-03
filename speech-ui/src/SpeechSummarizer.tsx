@@ -206,14 +206,15 @@ export default function SpeechSummarizer() {
 
               {/* ... File Upload остается без изменений ... */}
               <label className={`relative flex flex-col items-center justify-center w-full py-8 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ${file ? "border-green-500/50 bg-green-500/10" : "border-white/10 hover:border-indigo-400/50 hover:bg-white/5"}`}>
-                <input type="file" accept="audio/*" onChange={handleFileChange} className="hidden" />
+                <input type="file" accept=".mp3, .m4a, .ogg, .wav, audio/mpeg, audio/mp4, audio/ogg, audio/wav" onChange={handleFileChange} className="hidden" />
                 {file ? (
                   <div className="flex items-center gap-3 text-green-400 animate-in fade-in zoom-in duration-300">
                     <FileAudio className="w-6 h-6" /><span className="font-semibold truncate max-w-[200px]">{file.name}</span><CheckCircle2 className="w-5 h-5" />
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center text-gray-400">
+                  <div className="flex flex-col items-center text-center text-gray-400">
                     <Upload className="w-8 h-8 mb-2 text-indigo-400" /><span className="text-sm font-medium">Загрузите аудиофайл</span>
+                    <span className="text-xs text-gray-500 mt-1">Поддерживаемые форматы: MP3, M4A, OGG, WAV</span>
                   </div>
                 )}
               </label>
