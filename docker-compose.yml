@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  speech-service:
+    # Указываем, что контекст для сборки - это вся корневая папка ('.')
+    build:
+      context: .
+      # А Dockerfile находится в папке backend
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    container_name: speech_summarizer_service
