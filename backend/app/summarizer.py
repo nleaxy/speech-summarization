@@ -2,103 +2,94 @@ import requests
 import json
 import os
 
-# Получаем API ключ из переменной окружения
 API_KEY = os.getenv("API_KEY")
+MODEL_NAME = "nvidia/nemotron-3-super-120b-a12b:free"
 
-# Определяем типы суммаризации с промптами
 SUMMARIZATION_TYPES = {
-    "brief": {
-        "name": "Кратко",
-        "prompt": "Создай очень краткое резюме текста в 2-3 предложениях, передающее только главную идею. Пиши на том же языке, что и исходный текст."
-    },
-    "detailed": {
-        "name": "Подробно",
-        "prompt": "Создай подробное резюме текста одним большим абзацем (5-7 предложений), охватывающее все основные детали и ключевые моменты, но без глубоких углублений. Пиши на том же языке, что и исходный текст."
-    },
-    "structured": {
-        "name": "Структурированно",
-        "prompt": "Создай структурированное резюме текста, разбитое на несколько абзацев по главам или темам. Каждый абзац должен начинаться с ключевой темы и содержать 3-4 предложения. Пиши на том же языке, что и исходный текст."
-    },
-    "bullet_points": {
-        "name": "Ключевые пункты",
-        "prompt": "Создай резюме текста в виде маркированного списка из 5-8 ключевых пунктов. Каждый пункт должен быть кратким (1-2 предложения) и отражать важную информацию. Используй символ • для маркировки. Пиши на том же языке, что и исходный текст."
-    },
-    "executive": {
-        "name": "Для руководителей",
-        "prompt": "Создай исполнительную суммаризацию: краткое резюме для руководителей в 3-4 предложениях, фокусируясь на ключевых выводах, цифрах и практических последствиях. Пиши на том же языке, что и исходный текст."
-    }
+    "brief": {"name": "Кратко", "prompt": "Создай очень краткое резюме текста в 2-3 предложениях."},
+    "detailed": {"name": "Подробно", "prompt": "Создай подробное резюме текста одним большим абзацем (5-7 предложений)."},
+    "structured": {"name": "Структурированно", "prompt": "Создай структурированное резюме текста, разбитое на абзацы по темам."},
+    "bullet_points": {"name": "Ключевые пункты", "prompt": "Создай резюме в виде маркированного списка из 5-8 пунктов."},
+    "executive": {"name": "Для руководителей", "prompt": "Создай краткое резюме для руководителей, фокусируясь на выводах."}
 }
 
-def summarize_text(text, summary_type="brief"):
-    """
-    Args:
-        text (str): Текст для суммаризации
-        summary_type (str): Тип суммаризации (brief, detailed, structured, bullet_points, executive)
-        
-    Returns:
-        dict: {"summary": str} в случае успеха или {"error": str} в случае ошибки
-    """
+# Темы (Domain Adaptation)
+DOMAIN_PROMPTS = {
+    "general": "Используй общеупотребительный язык, понятный любому человеку.",
+    "informatics": (
+        "Ты — эксперт в Computer Science. Используй строгую техническую терминологию. "
+        "Обязательно делай упор на алгоритмы, архитектуру и стек технологий. "
+        "Заменяй общие фразы профессиональными терминами (например, вместо 'программа' пиши 'ПО/приложение', "
+        "вместо 'база' — 'СУБД')."
+    )
+}
+
+def get_available_types():
+    return {key: {"name": value["name"], "id": key} for key, value in SUMMARIZATION_TYPES.items()}
+
+def summarize_text(text, summary_type="brief", topic="general"):
+    if not API_KEY: return {"error": "API_KEY не настроен"}
     
-    if not API_KEY:
-        return {"error": "API_KEY не найден в переменных окружения"}
+    type_info = SUMMARIZATION_TYPES.get(summary_type, SUMMARIZATION_TYPES["brief"])
+    type_instr = type_info["prompt"]
+    domain_instr = DOMAIN_PROMPTS.get(topic, DOMAIN_PROMPTS["general"])
     
-    if not text or not text.strip():
-        return {"error": "Текст не может быть пустым"}
-    
-    # Проверяем, существует ли такой тип суммаризации
-    if summary_type not in SUMMARIZATION_TYPES:
-        return {"error": f"Неизвестный тип суммаризации: {summary_type}"}
-    
-    # Получаем промпт для выбранного типа
-    system_prompt = SUMMARIZATION_TYPES[summary_type]["prompt"]
+    system_prompt = f"{type_instr} {domain_instr} Пиши на том же языке, что и исходный текст."
     
     try:
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "http://localhost:5000",
-                "X-Title": "Text Summarizer",
-            },
+            headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
             data=json.dumps({
-                "model": "mistralai/devstral-small-2505",
+                "model": MODEL_NAME,
                 "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Суммаризируй следующий текст:\n\n{text}"
-                    }
-                ],
-            })
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Текст для суммаризации:\n\n{text}"}
+                ]
+            }),
+            timeout=60
         )
-        
         if response.status_code == 200:
-            result = response.json()
-            summary = result['choices'][0]['message']['content']
             return {
-                "summary": summary,
+                "summary": response.json()['choices'][0]['message']['content'],
                 "type": summary_type,
-                "type_name": SUMMARIZATION_TYPES[summary_type]["name"]
+                "type_name": type_info["name"],
+                "topic": topic
             }
-        else:
-            return {"error": f"Ошибка API: {response.status_code} - {response.text}"}
-            
+        return {"error": f"API Error: {response.status_code}"}
     except Exception as e:
-        return {"error": f"Произошла ошибка: {str(e)}"}
+        return {"error": str(e)}
 
-def get_available_types():
+def compare_summary(text, summary_type="brief"):
     """
-    Returns:
-        dict: Словарь с типами суммаризации и их описаниями
+    НОВОЕ: Функция для сравнения 'До' и 'После'.
+    Выполняет два запроса: обычный и с адаптацией под информатику.
     """
+    res_before = summarize_text(text, summary_type, topic="general")
+    res_after = summarize_text(text, summary_type, topic="informatics")
+    
     return {
-        key: {
-            "name": value["name"],
-            "id": key
-        }
-        for key, value in SUMMARIZATION_TYPES.items()
+        "before": res_before.get("summary"),
+        "after": res_after.get("summary")
     }
+
+def ask_question_about_text(text, question):
+    """Поисковая строка (Q&A)"""
+    try:
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+            data=json.dumps({
+                "model": MODEL_NAME,
+                "messages": [
+                    {"role": "system", "content": "Отвечай на вопросы строго по предоставленному тексту. Если ответа нет - так и скажи."},
+                    {"role": "user", "content": f"Текст: {text}\n\nВопрос: {question}"}
+                ]
+            }),
+            timeout=30
+        )
+        if response.status_code == 200:
+            return {"answer": response.json()['choices'][0]['message']['content']}
+        return {"error": "API Error"}
+    except Exception as e:
+        return {"error": str(e)}
